@@ -1,4 +1,5 @@
 from tkinter import PhotoImage, StringVar, IntVar, filedialog
+# os.environ["TKDND_LIB"] = "venv/lib/tkinterdnd2"
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import customtkinter as ctk
 from customtkinter import CTkImage
@@ -7,6 +8,12 @@ import os
 import time
 import threading
 import ipdb
+import sys
+
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(os.path.abspath(__file__))
 
 class Calc_folder_size:
     def __init__(self):
@@ -197,7 +204,7 @@ class GUI:
         self.progress_bar.set(0)
     
     def create_right_widgets(self):
-        image = PILImage.open("assets/dragarea/folder.png")
+        image = PILImage.open(os.path.join(base_path, "assets/dragarea/folder.png"))
         self.icon = CTkImage(light_image=image, size=(100, 100))
         self.icon_label = ctk.CTkLabel(
             self.right_frame, 
@@ -257,7 +264,7 @@ class GUI:
         )
         self.reduction_rate_label.pack(pady=10)
 
-        app_icon = PhotoImage(file="assets/icon.png")
+        app_icon = PhotoImage(file=os.path.join(base_path, "assets/icon.png"))
         self.root.iconphoto(False, app_icon)
 
     def enable_drag_and_drop(self):
@@ -309,16 +316,17 @@ class GUI:
             self.after_size = Calc_folder_size().calc_size(self.folder_path)
 
             saved_size = 0
-            if self.is_replace_original.get():
-                saved_size = self.before_size - self.after_size
-            else:
-                converted_img_size = self.after_size - self.before_size
-                saved_size = self.before_size - converted_img_size
+            if os.path.isdir(self.folder_path):
+                if self.is_replace_original.get():
+                    saved_size = self.before_size - self.after_size
+                else:
+                    converted_img_size = self.after_size - self.before_size
+                    saved_size = self.before_size - converted_img_size
 
-            if self.before_size != 0:
-                saved_rate = saved_size / self.before_size * 100
+            if self.before_size == 0:
+                saved_size = 0
             else:
-                saved_rate = 0
+                saved_rate = saved_size / self.before_size * 100
 
             if self.before_size == self.after_size:
                 saved_size = 0
@@ -344,9 +352,9 @@ class GUI:
     
     def update_status(self, status):
         status_images = {
-            "success": "assets/dragarea/dropped.png", 
-            "error": "assets/dragarea/error.png", 
-            "pending": "assets/dragarea/folder.png"
+            "success": os.path.join(base_path, "assets/dragarea/dropped.png"), 
+            "error": os.path.join(base_path, "assets/dragarea/error.png"), 
+            "pending": os.path.join(base_path, "assets/dragarea/folder.png")
         }
         self.icon = CTkImage(light_image=PILImage.open(status_images[status]), size=(100, 100))
         self.icon_label.configure(image=self.icon)
