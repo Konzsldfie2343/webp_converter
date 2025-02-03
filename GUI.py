@@ -31,6 +31,43 @@ class Calc_folder_size:
                 return f"{size_in_bytes:.2f} {unit}"
             size_in_bytes /= 1024
 
+
+frame_styles = {
+    "corner_radius": 10,
+    "fg_color": "#2E2E2E",
+    "border_width": 2,
+    "border_color": "#00ADB5"
+}
+
+frame_grid_styles = {
+    "row": 0,
+    "sticky": "nsew",
+    "padx": 20,
+    "pady": 20
+}
+
+text_base_style = {
+    "text_color": "#FFFFFF",
+    "fg_color": "transparent"
+}
+
+button_style = {
+    "text_color": "#FFFFFF",
+    "fg_color": "#00ADB5",
+    "font": ("Arial", 15),
+    "border_color": "#00ADB5",
+    "border_width": 1,
+    "hover_color": "#00CED1",
+}
+
+checkbox_style = {
+    "fg_color": "#2E2E2E",
+    "border_color": "#00ADB5",
+    "text_color": "#FFFFFF",
+    "hover_color": "#2E2E2E",
+    "border_width": 2
+}
+
 class GUI:
     def __init__(self):
         self.root = TkinterDnD.Tk()
@@ -64,21 +101,15 @@ class GUI:
 
         self.left_frame = ctk.CTkFrame(
             self.root, 
-            corner_radius=10, 
-            fg_color="#2E2E2E", 
-            border_width=2, 
-            border_color="#00ADB5"
+            **frame_styles
         )
-        self.left_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        self.left_frame.grid(column=0 , **frame_grid_styles)
         
         self.right_frame = ctk.CTkFrame(
             self.root, 
-            corner_radius=10, 
-            fg_color="#2E2E2E", 
-            border_width=2, 
-            border_color="#00ADB5"
+            **frame_styles
         )
-        self.right_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+        self.right_frame.grid(column=1, **frame_grid_styles)
         
         self.create_left_widgets()
         self.create_right_widgets()
@@ -88,24 +119,21 @@ class GUI:
             self.left_frame, 
             text="画像を自動で軽量化します", 
             font=("Arial", 30, "bold"), 
-            fg_color="transparent", 
-            text_color="#FFFFFF"
+            **text_base_style
         ).pack(pady=10)
         
         ctk.CTkLabel(
             self.left_frame, 
             textvariable=self.compression_label_text, 
             font=("Arial", 15), 
-            fg_color="transparent", 
-            text_color="#FFFFFF"
+            **text_base_style
         ).pack(pady=5)
 
         ctk.CTkLabel(
             self.left_frame, 
             textvariable=self.compression_quality_text, 
             font=("Arial", 12), 
-            fg_color="transparent", 
-            text_color="#FFFFFF"
+            **text_base_style
         ).pack(pady=5)
         
         self.quality_slider = ctk.CTkSlider(
@@ -129,23 +157,15 @@ class GUI:
         ctk.CTkCheckBox(
             self.left_frame, 
             text="変換後に元の画像を置き換える", 
-            fg_color="#2E2E2E", 
             variable=self.is_replace_original, 
-            text_color="#FFFFFF", 
-            border_width=2, 
-            border_color="#00ADB5", 
-            hover_color="#2E2E2E"
+            **checkbox_style
         ).pack(pady=5)
 
         ctk.CTkCheckBox(
             self.left_frame, 
             text="すべてのフォルダを対象にする", 
-            fg_color="#2E2E2E", 
             variable=self.is_recursive, 
-            text_color="#FFFFFF", 
-            border_width=2, 
-            border_color="#00ADB5", 
-            hover_color="#2E2E2E"
+            **checkbox_style
         ).pack(pady=5)
         
         self.listbox = ctk.CTkTextbox(
@@ -178,8 +198,7 @@ class GUI:
             self.left_frame, 
             textvariable=self.status_label_text, 
             font=("Arial", 15), 
-            fg_color="transparent", 
-            text_color="#FFFFFF"
+            **text_base_style
         )
         self.status_label.pack(pady=5)
 
@@ -202,22 +221,16 @@ class GUI:
         self.icon_label = ctk.CTkLabel(
             self.right_frame, 
             image=self.icon, 
-            fg_color="transparent", 
             text="DROP", 
             font=("Arial", 20, "bold"), 
-            text_color="#FFFFFF"
+            **text_base_style
         )
         self.icon_label.pack(pady=20)
         
         self.refresh_button = ctk.CTkButton(
             self.right_frame, 
             text="再読み込み", 
-            text_color="#FFFFFF", 
-            font=("Arial", 15), 
-            border_color="#00ADB5", 
-            border_width=1, 
-            fg_color="#00ADB5", 
-            hover_color="#00CED1", 
+            **button_style,
             command=self.refresh
         )
         self.refresh_button.pack(pady=10)
@@ -225,12 +238,7 @@ class GUI:
         self.run_button = ctk.CTkButton(
             self.right_frame, 
             text="実行", 
-            text_color="#FFFFFF", 
-            font=("Arial", 15), 
-            border_color="#00ADB5", 
-            border_width=1, 
-            fg_color="#00ADB5", 
-            hover_color="#00CED1", 
+            **button_style,
             command=self.run_conversion
         )
         self.run_button.pack(pady=10)
@@ -238,12 +246,7 @@ class GUI:
         self.browse_button = ctk.CTkButton(
             self.right_frame, 
             text="フォルダを選択", 
-            text_color="#FFFFFF", 
-            font=("Arial", 15), 
-            border_color="#00ADB5", 
-            border_width=1, 
-            fg_color="#00ADB5", 
-            hover_color="#00CED1", 
+            **button_style,
             command=self.browse_folder
         )
         self.browse_button.pack(pady=10)
@@ -252,8 +255,7 @@ class GUI:
             self.right_frame, 
             textvariable=self.reduction_rate, 
             font=("Arial", 15), 
-            fg_color="transparent", 
-            text_color="#FFFFFF"
+            **text_base_style
         )
         self.reduction_rate_label.pack(pady=10)
 
