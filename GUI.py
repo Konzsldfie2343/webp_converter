@@ -305,8 +305,12 @@ class GUI:
                 self.status_label_text
             )
         
+            # バグ発見！変換後の拡張子は.webpに変わっているので、このままでは変換後のサイズを計算できない
             # 変換後のサイズを計算
-            self.after_size = Calc_folder_size().calc_size(self.folder_path)
+            if os.path.isdir(self.folder_path):
+                self.after_size = Calc_folder_size().calc_size(self.folder_path)
+            else:
+                self.after_size = os.path.getsize(f"{self.folder_path.split('.')[0]}.webp")
 
             saved_size = 0
             if self.is_replace_original.get():
@@ -319,6 +323,11 @@ class GUI:
                 saved_rate = saved_size / self.before_size * 100
             else:
                 saved_rate = 0
+
+            if not os.path.isdir(f"{self.folder_path.split('.')[0]}.webp"):
+                if not self.is_replace_original.get():
+                    saved_size = self.before_size - self.after_size
+                    saved_rate = saved_size / self.before_size * 100
 
             if self.before_size == self.after_size:
                 saved_size = 0
