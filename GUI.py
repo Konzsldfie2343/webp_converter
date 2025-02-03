@@ -7,66 +7,9 @@ import os
 import time
 import threading
 import ipdb
-
-class Calc_folder_size:
-    def __init__(self):
-        self.path = ""
-        self.size = 0
-
-    def calc_size(self, path):
-        self.path = path
-        self.size = 0
-        if os.path.isdir(self.path):
-            for root, dirs, files in os.walk(self.path):
-                for file in files:
-                    self.size += os.path.getsize(os.path.join(root, file))
-            return self.size
-        elif os.path.isfile(self.path):
-            return os.path.getsize(self.path)
-        return 0
-
-    def format_size(self, size_in_bytes):
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-            if size_in_bytes < 1024:
-                return f"{size_in_bytes:.2f} {unit}"
-            size_in_bytes /= 1024
-
-
-frame_styles = {
-    "corner_radius": 10,
-    "fg_color": "#2E2E2E",
-    "border_width": 2,
-    "border_color": "#00ADB5"
-}
-
-frame_grid_styles = {
-    "row": 0,
-    "sticky": "nsew",
-    "padx": 20,
-    "pady": 20
-}
-
-text_base_style = {
-    "text_color": "#FFFFFF",
-    "fg_color": "transparent"
-}
-
-button_style = {
-    "text_color": "#FFFFFF",
-    "fg_color": "#00ADB5",
-    "font": ("Arial", 15),
-    "border_color": "#00ADB5",
-    "border_width": 1,
-    "hover_color": "#00CED1",
-}
-
-checkbox_style = {
-    "fg_color": "#2E2E2E",
-    "border_color": "#00ADB5",
-    "text_color": "#FFFFFF",
-    "hover_color": "#2E2E2E",
-    "border_width": 2
-}
+from styles import *
+import os
+from Compressor import Compressor
 
 class GUI:
     def __init__(self):
@@ -138,30 +81,20 @@ class GUI:
         
         self.quality_slider = ctk.CTkSlider(
             self.left_frame, 
-            from_=100, 
-            to=10, 
-            height=10, 
-            fg_color="#FFFFFF", 
-            button_hover_color="#00ADB5", 
-            bg_color="#2E2E2E", 
-            progress_color="#00CED1", 
-            button_color="#00ADB5", 
-            border_color="#00ADB5", 
-            border_width=2, 
-            orientation="horizontal", 
+            **quality_silider_style,
             variable=self.compression_ratio, 
             command=self.update_compression_label
         )
         self.quality_slider.pack(pady=10, padx=20)
         
-        ctk.CTkCheckBox(
+        self.is_replace_original_checkbox = ctk.CTkCheckBox(
             self.left_frame, 
             text="変換後に元の画像を置き換える", 
             variable=self.is_replace_original, 
             **checkbox_style
         ).pack(pady=5)
 
-        ctk.CTkCheckBox(
+        self.is_recursive_checkbox = ctk.CTkCheckBox(
             self.left_frame, 
             text="すべてのフォルダを対象にする", 
             variable=self.is_recursive, 
@@ -170,27 +103,14 @@ class GUI:
         
         self.listbox = ctk.CTkTextbox(
             self.left_frame, 
-            width=300, 
-            height=150, 
-            font=("Arial", 12), 
-            wrap="word", 
-            border_width=2, 
-            bg_color="#2E2E2E", 
-            fg_color="#2E2E2E", 
-            text_color="#FFFFFF", 
-            border_color="#00ADB5"
+            **listbox_style
         )
         self.listbox.pack(expand=True, fill="both", pady=10, padx=10)
         self.listbox.configure(state="disabled")
         
         self.progress_bar = ctk.CTkProgressBar(
             self.left_frame, 
-            width=300, 
-            fg_color="#2E2E2E", 
-            progress_color="#00ADB5", 
-            mode="determinate", 
-            border_color="#00ADB5", 
-            border_width=2
+            **progress_bar_style
         )
         self.progress_bar.set(0)
         
@@ -204,13 +124,7 @@ class GUI:
 
         self.progress_bar = ctk.CTkProgressBar(
             self.left_frame, 
-            width=300, 
-            height=10,
-            fg_color="#2E2E2E", 
-            progress_color="#00ADB5", 
-            mode="determinate", 
-            border_color="#00ADB5", 
-            border_width=1
+            **progress_bar_style
         )
         self.progress_bar.pack(pady=10)
         self.progress_bar.set(0)
@@ -266,6 +180,16 @@ class GUI:
         self.right_frame.drop_target_register(DND_FILES)
         self.right_frame.dnd_bind("<<Drop>>", self.on_drop)
 
+    def change_UI_mode(self, mode):
+        UI_ELEMENTS = [
+            self.refresh_button,
+            self.run_button,
+            self.browse_button,
+        ]
+        for element in UI_ELEMENTS:
+            if element:
+                element.configure(state=mode)
+
     def browse_folder(self):
         self.refresh()
         temp_folder_path = filedialog.askdirectory()
@@ -273,7 +197,7 @@ class GUI:
         self.compressor.on_browse(temp_folder_path, self.is_recursive.get())
         self.status_label_text.set(f"選択中：{os.path.basename(self.compressor.selected_folder)}")
         self.update_status("success")
-        self.folder_path = self.compressor.selected_folder
+        self.path = self.compressor.selected_folder
         self.display_file_names(self.compressor.file_list)
     
     def on_drop(self, event):
@@ -282,23 +206,16 @@ class GUI:
         self.status_label_text.set(f"選択中：{os.path.basename(self.compressor.selected_folder)}")
         self.reduction_rate.set("ドロップされました")
         self.update_status("success")
-        self.folder_path = self.compressor.selected_folder
+        self.path = self.compressor.selected_folder
         self.display_file_names(self.compressor.file_list)
 
     def run_conversion(self):
-        if not hasattr(self, 'folder_path'):
-            return
+        if not hasattr(self, 'path'): return
 
-        self.status_label_text.set(f"{os.path.basename(self.folder_path)} を変換中...")
-        self.refresh_button.configure(state="disabled")
-        self.run_button.configure(state="disabled")
-        self.browse_button.configure(state="disabled")
+        self.change_UI_mode("disabled")
 
         def conversion_task():
-            # 変換前のサイズを計算
-            self.before_size = Calc_folder_size().calc_size(self.folder_path)
         
-            # 画像変換の実行（処理中にプログレスバーなどが更新されると仮定）
             self.compressor.run(
                 self.compression_ratio.get(),
                 self.is_replace_original.get(),
@@ -307,51 +224,15 @@ class GUI:
                 self.status_label_text
             )
         
-            # バグ発見！変換後の拡張子は.webpに変わっているので、このままでは変換後のサイズを計算できない
-            # 変換後のサイズを計算
-            if os.path.isdir(self.folder_path):
-                self.after_size = Calc_folder_size().calc_size(self.folder_path)
-            else:
-                self.after_size = os.path.getsize(f"{self.folder_path.split('.')[0]}.webp")
-
-            saved_size = 0
-            if self.is_replace_original.get():
-                saved_size = self.before_size - self.after_size
-            else:
-                converted_img_size = self.after_size - self.before_size
-                saved_size = self.before_size - converted_img_size
-
-            if self.before_size != 0:
-                saved_rate = saved_size / self.before_size * 100
-            else:
-                saved_rate = 0
-
-            if not os.path.isdir(f"{self.folder_path.split('.')[0]}.webp"):
-                if not self.is_replace_original.get():
-                    saved_size = self.before_size - self.after_size
-                    saved_rate = saved_size / self.before_size * 100
-
-            if self.before_size == self.after_size:
-                saved_size = 0
-                saved_rate = 0
-        
-            # メインスレッドでUIの更新を実施
-            self.root.after(0, lambda: self.update_after_conversion(saved_size, saved_rate))
+            self.root.after(0, lambda: self.update_after_conversion())
 
         threading.Thread(target=conversion_task).start()
 
-        # XXX:修正作業中
-        result = 0
-        if not self.before_size == 0:
-            result = int(self.after_size / self.before_size * 100)
-
-    def update_after_conversion(self, saved_size, saved_rate):
-        self.after_size = Calc_folder_size().calc_size(self.folder_path)
-        self.reduction_rate.set(f"{saved_rate:.1f}%軽量化\n{Calc_folder_size().format_size(abs(saved_size))}削減")
-        self.refresh_button.configure(state="normal")
-        self.run_button.configure(state="normal")
-        self.browse_button.configure(state="normal")
-        self.status_label_text.set(f"{os.path.basename(self.folder_path)} を変換完了")
+    def update_after_conversion(self):
+        size_diff, size_rate = self.compressor.get_result()
+        self.reduction_rate.set(f"削減量：{size_diff} 削減率：{size_rate:.1f}%")
+        self.change_UI_mode("normal")
+        self.status_label_text.set(f"{os.path.basename(self.path)} を変換完了")
     
     def update_status(self, status):
         status_images = {
@@ -370,8 +251,8 @@ class GUI:
         self.listbox.configure(state="disabled")
     
     def refresh(self):
-        if hasattr(self, 'folder_path'):
-            del self.folder_path
+        if hasattr(self, 'path'):
+            del self.path
     
         self.listbox.configure(state="normal")
         self.listbox.delete(1.0, "end")
@@ -381,14 +262,14 @@ class GUI:
 
         self.reduction_rate.set("フォルダをドロップ\nしてください")
     
-        if not hasattr(self, 'folder_path'):
+        if not hasattr(self, 'path'):
             self.status_label_text.set("フォルダ未選択")
             self.update_status("pending")
         else:
             self.update_status("pending")
             self.status_label_text.set("準備完了")
 
-        self.compressor.refresh()
+        self.compressor = Compressor()
     
     def update_compression_label(self, event=None):
         self.compression_label_text.set(f"圧縮率: {self.compression_ratio.get()}%")
@@ -402,6 +283,6 @@ class GUI:
         elif 85 <= compression_ratio:
             return "◯推奨　サイズ減少量：小さい　劣化：少ない"
     
-    def run(self, compressor):
-        self.compressor = compressor
+    def run(self):
+        self.compressor = Compressor()
         self.root.mainloop()
