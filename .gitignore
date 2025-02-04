@@ -1,0 +1,38 @@
+# Python固有のファイル
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# 仮想環境のディレクトリ
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# 環境設定ファイル
+.env
+.venv
+
+# IDEやエディタ固有のファイル
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# テスト結果
+.pytest_cache/
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# ログファイル
+*.log
+
+# ビルド出力
+build/
+dist/
+*.egg-info/
+*.eggs/
