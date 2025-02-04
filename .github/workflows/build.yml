@@ -22,7 +22,7 @@ jobs:
         run: pyinstaller --onefile main.py
 
       - name: Upload EXE as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: executable
           path: dist/main.exe
