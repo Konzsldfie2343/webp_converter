@@ -23,7 +23,7 @@ class GUI:
     def __init__(self):
         self.root = TkinterDnD.Tk()
         self.root.geometry("800x500")
-        self.root.title("Compressor")
+        self.root.title("WebP Compressor")
         self.root.configure(bg="#1C1C1C")
         self.root.resizable(False, False)
         
