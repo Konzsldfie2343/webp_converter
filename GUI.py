@@ -14,7 +14,7 @@ from Compressor import Compressor
 class GUI:
     def __init__(self):
         self.root = TkinterDnD.Tk()
-        self.root.geometry("900x600")
+        self.root.geometry("800x500")
         self.root.title("Compressor")
         self.root.configure(bg="#1C1C1C")
         self.root.resizable(False, False)
@@ -41,18 +41,25 @@ class GUI:
         self.enable_drag_and_drop()
         
     def setup_ui(self):
-
         self.left_frame = ctk.CTkFrame(
             self.root, 
+            width=500,
             **frame_styles
         )
         self.left_frame.grid(column=0 , **frame_grid_styles)
+        self.left_frame.grid_propagate(False)
+        self.left_frame.pack_propagate(False)
+        self.left_frame.propagate(False)
         
         self.right_frame = ctk.CTkFrame(
             self.root, 
+            width=300,
             **frame_styles
         )
         self.right_frame.grid(column=1, **frame_grid_styles)
+        self.right_frame.grid_propagate(False)
+        self.right_frame.pack_propagate(False)
+        self.right_frame.propagate(False)
         
         self.create_left_widgets()
         self.create_right_widgets()

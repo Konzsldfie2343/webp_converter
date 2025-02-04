@@ -1,4 +1,5 @@
 frame_styles = {
+    "height": 500,
     "corner_radius": 10,
     "fg_color": "#2E2E2E",
     "border_width": 2,
