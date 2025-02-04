@@ -8,7 +8,9 @@ import os
 import time
 import threading
 import ipdb
-<<<<<<< HEAD
+from styles import *
+import os
+from Compressor import Compressor
 import sys
 
 if getattr(sys, 'frozen', False):
@@ -16,33 +18,6 @@ if getattr(sys, 'frozen', False):
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-class Calc_folder_size:
-    def __init__(self):
-        self.path = ""
-        self.size = 0
-
-    def calc_size(self, path):
-        self.path = path
-        self.size = 0
-        if os.path.isdir(self.path):
-            for root, dirs, files in os.walk(self.path):
-                for file in files:
-                    self.size += os.path.getsize(os.path.join(root, file))
-            return self.size
-        elif os.path.isfile(self.path):
-            return os.path.getsize(self.path)
-        return 0
-
-    def format_size(self, size_in_bytes):
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-            if size_in_bytes < 1024:
-                return f"{size_in_bytes:.2f} {unit}"
-            size_in_bytes /= 1024
-=======
-from styles import *
-import os
-from Compressor import Compressor
->>>>>>> branch-A-recovery
 
 class GUI:
     def __init__(self):
@@ -264,32 +239,7 @@ class GUI:
                 self.status_label_text
             )
         
-<<<<<<< HEAD
-            # 変換後のサイズを計算
-            self.after_size = Calc_folder_size().calc_size(self.folder_path)
-
-            saved_size = 0
-            if os.path.isdir(self.folder_path):
-                if self.is_replace_original.get():
-                    saved_size = self.before_size - self.after_size
-                else:
-                    converted_img_size = self.after_size - self.before_size
-                    saved_size = self.before_size - converted_img_size
-
-            if self.before_size == 0:
-                saved_size = 0
-            else:
-                saved_rate = saved_size / self.before_size * 100
-
-            if self.before_size == self.after_size:
-                saved_size = 0
-                saved_rate = 0
-        
-            # メインスレッドでUIの更新を実施
-            self.root.after(0, lambda: self.update_after_conversion(saved_size, saved_rate))
-=======
             self.root.after(0, lambda: self.update_after_conversion())
->>>>>>> branch-A-recovery
 
         threading.Thread(target=conversion_task).start()
 
