@@ -1,5 +1,6 @@
 from PIL import Image
 import os
+from Calc_Size import Calc_Size
 
 class Compressor:
     def __init__(self):
@@ -11,8 +12,9 @@ class Compressor:
         self.is_replace_original = False
         self.is_recursive = False
 
+        self.calsize = Calc_Size()
+
     def on_drop(self, event, is_recursive):
-        self.refresh()
         self.is_recursive = is_recursive
         self.selected_folder = event.data.strip("{ }")
         if not self.selected_folder: return
@@ -20,7 +22,6 @@ class Compressor:
         self.file_list = self.get_img_file_paths()
 
     def on_browse(self, folder_path, is_recursive):
-        self.refresh()
         self.is_recursive = is_recursive
         self.selected_folder = folder_path.strip("{ }")
         if not self.selected_folder: return
@@ -61,12 +62,12 @@ class Compressor:
             
     def convert_to_webp(self, file_path):
         output_img = f"{os.path.splitext(file_path)[0]}.webp"
+        self.calsize.add_before_size(file_path)
         with Image.open(file_path) as img:
             img.save(output_img, "webp", quality=self.compression_ratio)
         if self.is_replace_original:
             os.remove(file_path)
+        self.calsize.add_after_size(output_img)
 
-    def refresh(self):
-        self.selected_folder = None
-        self.file_list = None
-
+    def get_result(self):
+        return self.calsize.get_result()
