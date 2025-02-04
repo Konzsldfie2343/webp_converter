@@ -1,3 +1,0 @@
-([('main',
-   '/Users/yamashiro yu/image_converter/venv/dist/main',
-   'EXECUTABLE')],)
