@@ -26,7 +26,7 @@ jobs:
       run: pyinstaller --name "WebP Compressor" --icon="assets/icon.ico" --noconsole --onefile --collect-data tkinterdnd2 --windowed --add-data "assets:assets" main.py
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: exe
         path: dist/WebP\ Compressor.exe
