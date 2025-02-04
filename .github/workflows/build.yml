@@ -23,7 +23,7 @@ jobs:
       run: pip install pyinstaller
 
     - name: Build EXE
-      run: pyinstaller --name "WebP Compressor" --icon="assets/icon.ico" --noconsole --onefile --collect-data tkinterdnd2 --windowed --add-data "assets:assets" main.py
+      run: pyinstaller --name "WebP Compressor" --icon="assets/icon.ico" --noconsole --onefile --collect-data tkinterdnd2 --hidden-import=tkinterdnd2 --windowed --add-data "assets:assets" main.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
